@@ -1,7 +1,7 @@
 import re
 
 from blocks import BlockType, block_to_block_type
-from htmlnode import LeafNode, ParentNode
+from htmlnode import ParentNode
 from textnode import TextNode, TextType, text_node_to_html_node
 
 
