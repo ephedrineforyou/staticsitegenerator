@@ -1,8 +1,10 @@
 import os
 import shutil
+import sys
 
 from delimiter import extract_title, markdown_to_html_node
-from htmlnode import ParentNode
+
+# from htmlnode import ParentNode
 
 
 def clean_and_copy_directory(src, dst, first_call=True):
@@ -52,7 +54,7 @@ def generate_page(from_path, template_path, dest_path):
         f.write(template_content)
 
 
-def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path, basepath):
     # print(f"Generating page from {from_path} to {dest_path} using {template_path}")
 
     for item in os.listdir(dir_path_content):
@@ -70,22 +72,33 @@ def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
                 "{{ Title }}", markdown_title
             ).replace("{{ Content }}", markdown_html)
 
+            template_content = template_content.replace(
+                'href="/', f'href="{basepath}'
+            ).replace('src="/', f'src="{basepath}')
+
             os.makedirs(dest_dir_path, exist_ok=True)
 
             with open(f"{dest_dir_path}/{item[:-3]}.html", "w") as f:
                 f.write(template_content)
         elif not os.path.isfile(f"{dir_path_content}/{item}"):
             generate_pages_recursive(
-                f"{dir_path_content}/{item}", template_path, f"{dest_dir_path}/{item}"
+                f"{dir_path_content}/{item}",
+                template_path,
+                f"{dest_dir_path}/{item}",
+                basepath,
             )
 
 
 def main():
+    if len(sys.argv) > 1:
+        basepath = sys.argv[1]
+    else:
+        basepath = "/"
+
     source_dir = "static"
-    destination_dir = "public"
+    destination_dir = "docs"
     markdown_content_path = "content"
     template_path = "template.html"
-    final_html_path = "public"
 
     # Ensure source exists before running
     if os.path.exists(source_dir):
@@ -96,7 +109,7 @@ def main():
     if os.path.exists(markdown_content_path):
         if os.path.exists(template_path):
             generate_pages_recursive(
-                markdown_content_path, template_path, final_html_path
+                markdown_content_path, template_path, destination_dir, basepath
             )
         else:
             print(f"HTML Template at '{template_path}' not found.")
