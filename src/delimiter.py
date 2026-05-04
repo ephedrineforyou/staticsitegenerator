@@ -156,6 +156,15 @@ def text_to_children(text):
     return html_nodes
 
 
+def extract_title(markdown):
+    lines = markdown.split("\n")
+    for line in lines:
+        if line.startswith("# "):
+            split = line.split(" ", 1)
+            return split[1].strip()
+    raise Exception("no title found")
+
+
 def markdown_to_blocks(markdown):
     blocks = markdown.split("\n\n")
     blocks_parsed = []
@@ -173,6 +182,7 @@ def markdown_to_html_node(markdown):
     markdown_nodes = []
     for block in markdown_blocks:
         block_type = block_to_block_type(block)
+        print(block_type, repr(block[:60]))
         match block_type:
             case BlockType.HEADING:
                 heading_split = block.split(" ", 1)
